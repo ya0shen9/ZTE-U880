@@ -1,0 +1,3 @@
+---- BladePartsStartup Matches (2 in 2 files) ----
+AndroidManifest.xml:		<receiver android:name=".BladePartsStartup">
+BladePartsStartup.java (src\com\cyanogenmod\bladeparts):public class BladePartsStartup extends BroadcastReceiver

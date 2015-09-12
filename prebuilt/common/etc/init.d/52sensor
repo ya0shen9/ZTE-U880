@@ -1,0 +1,53 @@
+#!/system/bin/sh
+# 
+echo 'success u880 ProxCalibration '
+
+
+#cat /proc/driver/tsl2771_threshold > /marvell/tel/prox_thres;
+
+
+if [ -e /proc/driver/tsl2771_threshold ];
+then
+    SENSOR='/proc/driver/tsl2771_threshold'
+elif [ -e /proc/driver/isl29026_threshold ];
+then
+    SENSOR='/proc/driver/isl29026_threshold'
+fi;
+
+
+if [ -e $SENSOR ];
+then
+
+    echo $SENSOR
+    echo 'is existed'
+    while true; do 
+
+    VALUE=`cat $SENSOR`
+
+    echo $VALUE
+
+
+    if [ "$VALUE" = "13" ];
+    then
+        echo "wrong number13"
+    elif [ "$VALUE" = "-1" ];
+    then
+        echo "wrong number -1"
+    else
+        echo $VALUE
+        echo $VALUE > /marvell/tel/prox_thres;
+        break;
+     fi;
+
+   done
+
+
+
+fi;
+
+
+
+
+
+
+

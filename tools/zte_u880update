@@ -1,0 +1,99 @@
+#!/bin/bash
+
+export LOC="$PWD/out/target/product/u880"
+export lewa="$PWD"
+export U880_IMAGE="vendor/marvell/u880/bootimg/B10"
+
+export U880_bootloader="vendor/marvell/u880/bootimg/bootloader"
+
+mkdir -p "$LOC"/temp
+
+cd "$LOC"/temp
+echo "extract update.zip"
+
+#LOGNAME=$(cat /etc/passwd |awk -F':' '{print $1" "$3}'|grep \ $UID |awk '{print $1}')
+LOGNAME=$(logname)
+
+#echo $LOGNAME
+TARGET_BUILD_VARIANT=eng
+DATE_BUILD=$(date +%y.%m.%d.%H)
+unzip -o -qq  "$LOC"/$TARGET_PRODUCT-ota-$TARGET_BUILD_VARIANT.$LOGNAME.zip
+
+echo "Making u880 Compatible Update script"
+cd "$LOC"
+cd "$LOC"/temp/META-INF/com/google/android
+rm -rf updater-script
+cp "$lewa"/vendor/marvell/u880/tools/updater-script "$LOC"/temp/META-INF/com/google/android/updater-script
+# by Fanzhong add ramdisk.img
+if [ -e $lewa/$U880_IMAGE/ramdisk.img ]
+then
+echo "Adding ramdisk.img to FULL"
+cp "$lewa"/$U880_IMAGE/ramdisk.img "$LOC"/temp/ramdisk.img
+fi
+# by Fanzhong add kernel.img
+if [ -e $lewa/$U880_IMAGE/kernel.img ]
+then
+echo "Adding kernel.img to FULL"
+cp "$lewa"/$U880_IMAGE/kernel.img "$LOC"/temp/kernel.img
+fi
+if [ -e $lewa/$U880_IMAGE/kernel.img ]
+then
+echo "Adding bootloader to FULL"
+cp "$lewa"/$U880_bootloader "$LOC"/temp/bootloader
+fi
+# end
+echo Zipping Package
+cd "$LOC"/temp
+rm -rf "$LOC"/temp/recovery
+rm -rf "$LOC"/$TARGET_PRODUCT-ota-$TARGET_BUILD_VARIANT.$LOGNAME.zip
+zip -9yr "$LOC"/$TARGET_PRODUCT-ota-$TARGET_BUILD_VARIANT.$LOGNAME.zip * > /dev/null
+cd "$LOC"
+
+# by FanZhong add ramdisk to OTA package
+# ugly, maybe change later...
+# add kernel.img
+if [ -e $lewa/$U880_IMAGE/ramdisk.img ] || [ -e $lewa/$U880_IMAGE/kernel.img || [ -e $lewa/$U880_bootloader]
+then
+    cd "$LOC"
+    mkdir OTA_temp
+    cd "$LOC"/OTA_temp
+    unzip -o -qq "$LOC"/obj/PACKAGING/target_files_intermediates/$TARGET_PRODUCT-target_files-$TARGET_BUILD_VARIANT.$LOGNAME.zip
+    if [ -e $lewa/$U880_IMAGE/ramdisk.img ]
+    then
+        cp $lewa/$U880_IMAGE/ramdisk.img "$LOC"/OTA_temp
+    fi
+    if [ -e $lewa/$U880_IMAGE/kernel.img ]
+    then
+        cp $lewa/$U880_IMAGE/kernel.img "$LOC"/OTA_temp
+    fi
+    if [ -e $lewa/$U880_IMAGE/kernel.img ]
+    then
+        cp $lewa/$U880_bootloader "$LOC"/OTA_temp
+    fi
+    rm -fr "$LOC"/OTA_LeWa_ROM_u880_*.zip
+    zip -9yur "$LOC"/OTA_LeWa_ROM_u880_$DATE_BUILD.zip * > /dev/null
+    cd "$LOC"
+    rm -fr OTA_temp
+fi
+#end
+
+LEWA_OTA_FULL_PACKAGE="$LOC"/FULL_LeWa_ROM_u880_$DATE_BUILD.zip
+NEW_OTA_PACKAGE="$LOC"/$TARGET_PRODUCT-ota-$TARGET_BUILD_VARIANT.$LOGNAME.zip
+
+#cp -fr $(NEW_OTA_PACKAGE)  $(LEWA_OTA_FULL_PACKAGE)
+rm -fr "$LOC"/FULL_LeWa_ROM_u880_*.zip
+
+#sign
+printf "Signing Lewa OTA package..."
+java -Xmx512m \
+    -jar "$lewa"/out/host/linux-x86/framework/signapk.jar \
+    -w "$lewa"/build/target/product/security/testkey.x509.pem "$lewa"/build/target/product/security/testkey.pk8 \
+    $NEW_OTA_PACKAGE $LEWA_OTA_FULL_PACKAGE
+#   "$LOC"/$TARGET_PRODUCT-ota-$TARGET_BUILD_VARIANT.$LOGNAME.zip "$LOC"/#FULL_LeWa_ROM_u880_$(date +%y.%m.%d.%H).zip 
+echo
+
+
+echo Cleanup...
+rm -rf "$LOC"/temp
+#sh "$lewa"/vendor/cyanogen/tools/squisher
+echo done

@@ -1,0 +1,9 @@
+#!/system/bin/sh
+# execute any postinstall script then kill it
+if [ -e /system/swap.img ];
+then
+   rm -fr /system/swap.img;
+fi;
+
+rm -f /etc/init.d/51clean;
+

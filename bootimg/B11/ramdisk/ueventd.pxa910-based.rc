@@ -1,0 +1,19 @@
+/dev/snd/* 0660 system audio
+/dev/citty* 0666 radio radio
+/dev/ccichar 0640 radio radio
+/dev/video0 0660 root camera
+/dev/cctdatadev0 0640 radio radio
+/dev/cidatatty* 0640 radio radio
+/dev/bmm 0777 root video
+/dev/ire 0777 root video
+/dev/galcore 0777 root audio
+/dev/pmem 0666 media system
+/dev/pmem_adsp 0777 root camera
+/dev/cnm 0777 root video
+/dev/rfkill 0660 system wifi
+/dev/video1 0666 system system
+/dev/radio0 0660 system system
+/sys/devices/virtual/input/input*   active    0660  root   input
+/sys/devices/virtual/input/input*   interval  0660  root   input
+/sys/devices/virtual/input/input*   wake      0220  root   input
+/sys/devices/virtual/input/input*   position  0660  root   input

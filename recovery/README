@@ -1,0 +1,15 @@
+This Directory is made for recovery use:
+
+1.init.*.rc: The chip based init.*.rc for recovery.
+2.lib/modules: Directory for additional private modules may insmod to kernel
+3.res/ :Directory for private resources.
+4.bin/ :Directory for binaries. busybox, adbd are essentail. You can add more for recovery use.
+
+->How to make busybox
+  a)download the busybox sources code from http://www.busybox.net/
+  b)make menuconfig and configure busybox as desired
+    Do remember to choose Build Options  ---> Build BusyBox as a static binary (no shared libs)
+    Use the Cross Compiler:Do you want to build BusyBox with a Cross Compiler?
+    Do remember to choose Installation Options  --->Don't use /usr
+  c)make
+
